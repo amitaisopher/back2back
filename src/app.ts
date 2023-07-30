@@ -9,10 +9,6 @@ import appSetup from './startup/init';
 import routerSetup from './startup/router';
 import securitySetup from './startup/security';
 
-// database connections
-
-appSetup(app)
+appSetup(app) // Connecting to databses
 securitySetup(app, express)
 routerSetup(app)
-
-// end

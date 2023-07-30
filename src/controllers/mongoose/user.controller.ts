@@ -1,19 +1,23 @@
 import { Router, Request, Response } from 'express';
 import { IUser } from '../../databases/mongodb/model/user.model';
-import UserModel from '../../databases/mongodb/schema/user.schema';
+import UserModel, { createUserInput, createUserSchema } from '../../databases/mongodb/schema/user.schema';
+import validateResource from '../../middleware/validateResource';
 
 const controller = Router();
 
 controller
 
-    .post('/', async (req, res) => {
+    .post('/', validateResource(createUserSchema), async (req: Request<{}, {}, createUserInput>, res: Response) => {
         const newUser = new UserModel();
         newUser.username = req.body.username;
         newUser.email = req.body.email;
         newUser.password = req.body.password;
-
-        await newUser.save();
-        res.status(201).send(newUser);
+        try {
+            await newUser.save();
+            res.status(201).send(newUser);
+        } catch (error) {
+            res.status(500).send(error)
+        }
     })
 
     .get('/', async (req: Request, res: Response) => {
