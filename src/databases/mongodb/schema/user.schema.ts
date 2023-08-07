@@ -1,53 +1,65 @@
-import { Schema, model } from 'mongoose';
-import { IUser } from '../model/user.model';
 import { object, string, TypeOf } from 'zod';
-
-const schema = new Schema<IUser>(
-    {
-        username: {
-            type: String,
-            required: true,
-            unique: true,
-        },
-        email: {
-            type: String,
-            required: true,
-            unique: true,
-        },
-        password: {
-            type: String,
-            required: true,
-            select: false,
-        },
-    },
-    {
-        timestamps: true,
-    }
-);
 
 export const createUserSchema = object({
     body: object({
-        username: string({
-            required_error: 'Username is required'
+        firstName: string({
+            required_error: 'First name is required',
+        }),
+        lastName: string({
+            required_error: 'Last name is required',
+        }),
+        password: string({
+            required_error: 'Password is required',
+        }).min(6, 'Password is too short - should be min 6 chars'),
+        passwordConfirmation: string({
+            required_error: 'Password confirmation is required',
         }),
         email: string({
-            required_error: 'Email is required'
-        })
-            .email('Not a valid email address')
-            .min(5, 'Email address is too short'),
-        password: string({
-            required_error: 'Password is required'
-        })
-            .min(6, 'Password too short - it must be at least 6 characters long'),
-        passwordConfirmation: string({
-            required_error: 'Password confirmation is required'
-        })
+            required_error: 'Email is required',
+        }).email('Not a valid email'),
     }).refine((data) => data.password === data.passwordConfirmation, {
         message: 'Passwords do not match',
-        path: ['passwordConfirmation']
-    })
-})
+        path: ['passwordConfirmation'],
+    }),
+});
 
-export type createUserInput = TypeOf<typeof createUserSchema>['body']
+export const verifyUserSchema = object({
+    params: object({
+        id: string(),
+        verificationCode: string(),
+    }),
+});
 
-export default model<IUser>('user', schema);
+export const forgotPasswordSchema = object({
+    body: object({
+        email: string({
+            required_error: 'Email is required',
+        }).email('Not a valid email'),
+    }),
+});
+
+export const resetPasswordSchema = object({
+    params: object({
+        id: string(),
+        passwordResetCode: string(),
+    }),
+    body: object({
+        password: string({
+            required_error: 'Password is required',
+        }).min(6, 'Password is too short - should be min 6 chars'),
+        passwordConfirmation: string({
+            required_error: 'Password confirmation is required',
+        }),
+    }).refine((data) => data.password === data.passwordConfirmation, {
+        message: 'Passwords do not match',
+        path: ['passwordConfirmation'],
+    }),
+});
+
+export type CreateUserInput = TypeOf<typeof createUserSchema>['body'];
+
+export type VerifyUserInput = TypeOf<typeof verifyUserSchema>['params'];
+
+export type ForgotPasswordInput = TypeOf<typeof forgotPasswordSchema>['body'];
+
+export type ResetPasswordInput = TypeOf<typeof resetPasswordSchema>;

@@ -1,6 +1,7 @@
 import { Express } from 'express';
 import mongooseConnect from '../databases/mongodb/mongodb';
 import typeORMConnect from '../databases/postgresql/typeorm';
+import log from '../utils/logger';
 
 const appSetup = async (app: Express) => {
     try {
@@ -8,15 +9,15 @@ const appSetup = async (app: Express) => {
             typeORMConnect(),
             mongooseConnect()
         ])
-        console.log('Databases connected successfully')
+        log.info('All databases connected successfully')
 
         const APP_PORT = process.env.EXPRESS_APP_PORT || 3000;
 
         app.listen(APP_PORT, () => {
-            console.log(`🔥 Server started on port ${APP_PORT}`);
+            log.info(`🔥 Server started on port ${APP_PORT}`);
         });
     } catch (error) {
-        console.log('Unable to start the app!')
+        log.error('Unable to start the app!')
         console.error(error)
     }
 

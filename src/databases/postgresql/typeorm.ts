@@ -1,4 +1,5 @@
 import { DataSource, EntityTarget, ObjectLiteral, Repository } from 'typeorm';
+import log from '../../utils/logger';
 
 let typeORMDB: DataSource;
 
@@ -10,10 +11,12 @@ export default async function typeORMConnect(): Promise<void> {
             `${__dirname}/entity/*.entity.js`,
             `${__dirname}/entity/*.entity.ts`
         ], // points to entities
+        logging: false,
         synchronize: process.env.NODE_ENV === 'prduction' ? false : true, // Should not be used on Production - instead you should use migration files
     });
 
     typeORMDB = await dataSource.initialize();
+    log.info('Successfully connected to Postgres DB')
 }
 
 // Executes TypeORM query for the provided entity model
